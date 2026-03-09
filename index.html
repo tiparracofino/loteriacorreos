@@ -79,6 +79,14 @@ transition: transform 0.2s;
 }
 .hanko:active { transform: rotate(-3deg) scale(0.92); }
 
+/* ── App Logo ── */
+.app-logo {
+width: 44px;
+height: 44px;
+flex-shrink: 0;
+filter: drop-shadow(0 1px 2px rgba(194,59,34,0.3));
+}
+
 /* ── Navigation ── */
 .nav {
 position: fixed;
@@ -760,9 +768,40 @@ body.modal-open { overflow: hidden; }
 <!-- ═══ HEADER ═══ -->
 
 <div class="header">
-  <div>
-    <div class="header-title"><span class="kanji">宝くじ</span> Takarakuji</div>
-    <div class="header-sub">Grupo de lotería</div>
+  <div style="display:flex; align-items:center; gap:12px;">
+    <svg class="app-logo" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+      <!-- Correos-style organic blob shape -->
+      <defs>
+        <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#c23b22"/>
+          <stop offset="100%" stop-color="#a02a18"/>
+        </linearGradient>
+        <!-- Ticket perforated edge mask -->
+        <mask id="ticketMask">
+          <rect width="120" height="120" fill="white"/>
+          <!-- Left perforations -->
+          <circle cx="18" cy="35" r="3" fill="black"/>
+          <circle cx="18" cy="48" r="3" fill="black"/>
+          <circle cx="18" cy="61" r="3" fill="black"/>
+          <circle cx="18" cy="74" r="3" fill="black"/>
+          <circle cx="18" cy="87" r="3" fill="black"/>
+        </mask>
+      </defs>
+      <!-- Correos-style rounded blob -->
+      <path d="M60,12 C82,12 98,18 104,32 C110,46 108,58 106,68 C104,78 100,90 88,98 C76,106 64,108 52,106 C40,104 28,98 20,86 C12,74 10,60 12,46 C14,32 24,18 38,14 C46,11.5 53,12 60,12 Z" fill="url(#logoGrad)" mask="url(#ticketMask)"/>
+      <!-- Ticket divider line (dashed) -->
+      <line x1="36" y1="28" x2="36" y2="96" stroke="rgba(255,255,255,0.2)" stroke-width="1" stroke-dasharray="3,4"/>
+      <!-- Kanji 宝 (treasure) centered -->
+      <text x="66" y="72" font-family="'Shippori Mincho', serif" font-size="42" font-weight="800" fill="#f5f0e8" text-anchor="middle">宝</text>
+      <!-- Small stars on the ticket stub side -->
+      <text x="27" y="46" font-size="9" fill="rgba(255,255,255,0.6)" text-anchor="middle">★</text>
+      <text x="27" y="62" font-size="7" fill="rgba(255,255,255,0.4)" text-anchor="middle">✦</text>
+      <text x="27" y="78" font-size="9" fill="rgba(255,255,255,0.6)" text-anchor="middle">★</text>
+    </svg>
+    <div>
+      <div class="header-title"><span class="kanji">宝くじ</span> Takarakuji</div>
+      <div class="header-sub">Grupo de lotería</div>
+    </div>
   </div>
   <div class="hanko" onclick="openSettings()" title="Ajustes">設</div>
 </div>
@@ -1321,14 +1360,18 @@ function renderMembers() {
     return;
   }
   const active = getActiveCollection();
-  container.innerHTML = data.members.map((m, i) => {
+  // Sort alphabetically but keep original indices for editing
+  const sorted = data.members
+    .map((m, i) => ({ member: m, originalIndex: i }))
+    .sort((a, b) => a.member.name.localeCompare(b.member.name, 'es', { sensitivity: 'base' }));
+  container.innerHTML = sorted.map(({ member: m, originalIndex }) => {
     let statusHtml = '';
     if (active && active.payments.hasOwnProperty(m.name)) {
       const paid = active.payments[m.name];
       statusHtml = `<div class="member-status"><span class="status-dot ${paid ? 'paid' : 'pending'}"></span>${paid ? 'Pagado' : 'Pendiente'}</div>`;
     }
     return `
-    <div class="card member-card editable" onclick="editMember(${i})">
+    <div class="card member-card editable" onclick="editMember(${originalIndex})">
       <div class="member-info">
         <div class="member-avatar">${m.name.charAt(0).toUpperCase()}</div>
         <div>
@@ -1538,7 +1581,7 @@ function renderPaymentTracker() {
     return;
   }
 
-  const members = Object.keys(active.payments);
+  const members = Object.keys(active.payments).sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
   const paidCount = members.filter(m => active.payments[m]).length;
   const totalCount = members.length;
   const allPaid = paidCount === totalCount && totalCount > 0;

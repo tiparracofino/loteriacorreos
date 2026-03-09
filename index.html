@@ -1,0 +1,2050 @@
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="宝くじ">
+<title>宝くじ · Takarakuji</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;800&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html, body {
+  font-family: 'Noto Sans JP', sans-serif;
+  background: #f5f0e8;
+  color: #1a1a1a;
+  min-height: 100vh;
+  min-height: 100dvh;
+  min-height: -webkit-fill-available;
+  overscroll-behavior: none;
+  font-size: 15px;
+  line-height: 1.5;
+}
+html { height: -webkit-fill-available; }
+body {
+  padding-top: 0;
+  padding-bottom: 90px;
+  padding-bottom: calc(max(20px, env(safe-area-inset-bottom, 20px)) + 70px);
+}
+
+/* ── Header ── */
+.header {
+position: -webkit-sticky;
+position: sticky;
+top: 0;
+z-index: 100;
+background: #f5f0e8;
+border-bottom: 1px solid #e8e0d0;
+padding: 12px 20px;
+padding-top: 59px;
+padding-top: calc(env(safe-area-inset-top, 59px) + 8px);
+display: flex;
+align-items: center;
+justify-content: space-between;
+}
+.header-title {
+font-family: ‘Shippori Mincho’, serif;
+font-size: 1.6rem;
+font-weight: 800;
+letter-spacing: 0.05em;
+}
+.header-title .kanji {
+color: #c23b22;
+font-size: 1.8rem;
+}
+.header-sub {
+font-size: 0.7rem;
+color: #6b6560;
+letter-spacing: 0.15em;
+text-transform: uppercase;
+}
+
+/* ── Hanko seal ── */
+.hanko {
+width: 38px; height: 38px;
+border: 2px solid #c23b22;
+border-radius: 4px;
+display: flex; align-items: center; justify-content: center;
+font-family: ‘Shippori Mincho’, serif;
+font-size: 1rem;
+color: #c23b22;
+font-weight: 800;
+transform: rotate(-3deg);
+flex-shrink: 0;
+cursor: pointer;
+transition: transform 0.2s;
+}
+.hanko:active { transform: rotate(-3deg) scale(0.92); }
+
+/* ── Navigation ── */
+.nav {
+position: fixed;
+bottom: 0; left: 0; right: 0;
+z-index: 100;
+background: #f5f0e8;
+border-top: 1px solid #e8e0d0;
+display: flex;
+padding-bottom: 20px;
+padding-bottom: max(20px, env(safe-area-inset-bottom, 20px));
+}
+.nav-item {
+flex: 1;
+display: flex;
+flex-direction: column;
+align-items: center;
+padding: 10px 4px 6px;
+cursor: pointer;
+color: #a09890;
+font-size: 0.65rem;
+letter-spacing: 0.08em;
+transition: color 0.2s;
+border: none;
+background: none;
+font-family: inherit;
+}
+.nav-item.active { color: #c23b22; }
+.nav-item .nav-kanji {
+font-family: ‘Shippori Mincho’, serif;
+font-size: 1.3rem;
+font-weight: 600;
+line-height: 1.2;
+}
+
+/* ── Screens ── */
+.screen { display: none; padding: 16px 20px; }
+.screen.active { display: block; animation: fadeIn 0.25s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+/* ── Fund Summary Card ── */
+.fund-card {
+background: #1a1a1a;
+color: #f5f0e8;
+border-radius: 12px;
+padding: 24px;
+margin-bottom: 20px;
+position: relative;
+overflow: hidden;
+}
+.fund-card::before {
+content: ‘宝’;
+position: absolute;
+top: -10px; right: -5px;
+font-family: ‘Shippori Mincho’, serif;
+font-size: 7rem;
+opacity: 0.04;
+font-weight: 800;
+line-height: 1;
+}
+.fund-label {
+font-size: 0.7rem;
+letter-spacing: 0.2em;
+opacity: 0.6;
+text-transform: uppercase;
+margin-bottom: 4px;
+}
+.fund-amount {
+font-family: ‘Shippori Mincho’, serif;
+font-size: 2.6rem;
+font-weight: 800;
+line-height: 1.1;
+}
+.fund-amount .currency { font-size: 1.2rem; opacity: 0.5; margin-left: 2px; }
+.fund-row {
+display: flex;
+justify-content: space-between;
+margin-top: 16px;
+padding-top: 16px;
+border-top: 1px solid rgba(255,255,255,0.1);
+}
+.fund-stat { text-align: center; flex:1; }
+.fund-stat-value {
+font-family: ‘Shippori Mincho’, serif;
+font-size: 1.2rem;
+font-weight: 600;
+}
+.fund-stat-label {
+font-size: 0.6rem;
+letter-spacing: 0.15em;
+opacity: 0.5;
+text-transform: uppercase;
+margin-top: 2px;
+}
+.positive { color: #6bcf8e; }
+.negative { color: #f08080; }
+
+/* ── Section titles ── */
+.section-title {
+font-family: ‘Shippori Mincho’, serif;
+font-size: 1rem;
+font-weight: 600;
+margin-bottom: 12px;
+display: flex;
+align-items: center;
+gap: 8px;
+}
+.section-title .dot {
+width: 6px; height: 6px;
+background: #c23b22;
+border-radius: 50%;
+flex-shrink: 0;
+}
+
+/* ── Cards & Lists ── */
+.card {
+background: white;
+border-radius: 12px;
+padding: 16px;
+margin-bottom: 10px;
+box-shadow: 0 1px 3px rgba(26,26,26,0.08);
+transition: transform 0.15s;
+}
+.card:active { transform: scale(0.985); }
+
+.member-card {
+display: flex;
+align-items: center;
+justify-content: space-between;
+}
+.member-info { display: flex; align-items: center; gap: 12px; flex:1; min-width:0; }
+.member-avatar {
+width: 36px; height: 36px;
+background: #e8e0d0;
+border-radius: 50%;
+display: flex; align-items: center; justify-content: center;
+font-family: ‘Shippori Mincho’, serif;
+font-size: 0.85rem;
+font-weight: 600;
+color: #6b6560;
+flex-shrink: 0;
+}
+.member-name {
+font-weight: 500;
+font-size: 0.95rem;
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
+}
+.member-since {
+font-size: 0.65rem;
+color: #a09890;
+}
+.member-remove {
+width: 32px; height: 32px;
+border: none;
+background: none;
+color: #a09890;
+font-size: 1.2rem;
+cursor: pointer;
+border-radius: 50%;
+display: flex; align-items: center; justify-content: center;
+transition: all 0.15s;
+flex-shrink: 0;
+}
+.member-remove:hover { background: #fee; color: #c23b22; }
+
+/* ── Play entry ── */
+.play-entry {
+display: flex;
+align-items: center;
+justify-content: space-between;
+}
+.play-info { flex:1; }
+.play-type {
+font-weight: 500;
+font-size: 0.9rem;
+}
+.play-type .badge {
+display: inline-block;
+font-size: 0.6rem;
+padding: 2px 8px;
+border-radius: 20px;
+margin-left: 6px;
+font-weight: 500;
+letter-spacing: 0.05em;
+}
+.badge-euro { background: #e8f0fe; color: #1a56db; }
+.badge-primi { background: #fef3e8; color: #b45309; }
+.play-date { font-size: 0.65rem; color: #a09890; margin-top: 2px; }
+.play-amount {
+font-family: ‘Shippori Mincho’, serif;
+font-weight: 600;
+font-size: 1rem;
+color: #c23b22;
+flex-shrink: 0;
+}
+
+/* ── Win entry ── */
+.win-amount { color: #2d6a4f; }
+
+/* ── Buttons ── */
+.btn {
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 8px;
+width: 100%;
+padding: 14px;
+border: none;
+border-radius: 12px;
+font-family: ‘Noto Sans JP’, sans-serif;
+font-size: 0.85rem;
+font-weight: 500;
+cursor: pointer;
+transition: all 0.15s;
+letter-spacing: 0.05em;
+}
+.btn:active { transform: scale(0.97); }
+.btn-primary {
+background: #1a1a1a;
+color: #f5f0e8;
+}
+.btn-vermillion {
+background: #c23b22;
+color: white;
+}
+.btn-outline {
+background: none;
+border: 1.5px solid #e8e0d0;
+color: #1a1a1a;
+}
+.btn-danger {
+background: none;
+border: 1.5px solid #c23b22;
+color: #c23b22;
+}
+.btn-sm {
+padding: 10px 16px;
+width: auto;
+font-size: 0.8rem;
+}
+.btn-row { display: flex; gap: 8px; margin-top: 12px; }
+.btn-row .btn { flex:1; }
+
+/* ── Quick play buttons ── */
+.quick-play {
+display: flex;
+gap: 10px;
+margin-bottom: 20px;
+}
+.quick-play-btn {
+flex: 1;
+background: white;
+border: 2px solid #e8e0d0;
+border-radius: 12px;
+padding: 16px 12px;
+cursor: pointer;
+text-align: center;
+transition: all 0.2s;
+font-family: inherit;
+}
+.quick-play-btn:active { transform: scale(0.95); }
+.quick-play-btn .qp-icon {
+font-family: ‘Shippori Mincho’, serif;
+font-size: 1.6rem;
+font-weight: 800;
+margin-bottom: 4px;
+}
+.quick-play-btn .qp-name {
+font-size: 0.75rem;
+font-weight: 500;
+margin-bottom: 2px;
+}
+.quick-play-btn .qp-price {
+font-size: 0.7rem;
+color: #a09890;
+}
+.qp-euro { color: #1a56db; }
+.qp-primi { color: #b45309; }
+.qp-euro-border:active, .qp-euro-border:hover { border-color: #1a56db; }
+.qp-primi-border:active, .qp-primi-border:hover { border-color: #b45309; }
+
+/* ── Modals ── */
+.modal-overlay {
+position: fixed;
+top:0; left:0; right:0; bottom:0;
+z-index: 200;
+background: rgba(26,26,26,0.5);
+display: flex;
+align-items: flex-end;
+justify-content: center;
+opacity: 0;
+pointer-events: none;
+transition: opacity 0.25s;
+}
+.modal-overlay.open {
+opacity: 1;
+pointer-events: auto;
+}
+.modal {
+background: #f5f0e8;
+border-radius: 16px 16px 0 0;
+width: 100%;
+max-width: 500px;
+max-height: 85dvh;
+max-height: 85vh;
+overflow-y: auto;
+-webkit-overflow-scrolling: touch;
+padding: 24px 20px 40px;
+padding-bottom: calc(20px + max(20px, env(safe-area-inset-bottom, 20px)));
+transform: translateY(100%);
+transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.modal-overlay.open .modal {
+transform: translateY(0);
+}
+.modal-handle {
+width: 36px; height: 4px;
+background: #e8e0d0;
+border-radius: 2px;
+margin: 0 auto 16px;
+}
+.modal-title {
+font-family: ‘Shippori Mincho’, serif;
+font-size: 1.2rem;
+font-weight: 600;
+margin-bottom: 20px;
+text-align: center;
+}
+
+/* ── Form elements ── */
+.form-group { margin-bottom: 16px; }
+.form-label {
+display: block;
+font-size: 0.7rem;
+letter-spacing: 0.12em;
+color: #6b6560;
+text-transform: uppercase;
+margin-bottom: 6px;
+}
+.form-input {
+width: 100%;
+padding: 12px 14px;
+border: 1.5px solid #e8e0d0;
+border-radius: 8px;
+font-family: inherit;
+font-size: 1rem;
+background: white;
+color: #1a1a1a;
+transition: border-color 0.2s;
+-webkit-appearance: none;
+}
+.form-input:focus {
+outline: none;
+border-color: #1a1a1a;
+}
+.form-input::placeholder { color: #a09890; }
+select.form-input {
+cursor: pointer;
+}
+
+/* ── Columns selector ── */
+.columns-selector {
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 20px;
+margin: 12px 0;
+}
+.col-btn {
+width: 44px; height: 44px;
+border-radius: 50%;
+border: 1.5px solid #e8e0d0;
+background: white;
+font-size: 1.2rem;
+cursor: pointer;
+display: flex; align-items: center; justify-content: center;
+font-family: inherit;
+color: #1a1a1a;
+transition: all 0.15s;
+}
+.col-btn:active { transform: scale(0.9); }
+.col-count {
+font-family: ‘Shippori Mincho’, serif;
+font-size: 2rem;
+font-weight: 800;
+min-width: 50px;
+text-align: center;
+}
+
+/* ── Season card ── */
+.season-card {
+background: white;
+border-radius: 12px;
+padding: 16px;
+margin-bottom: 10px;
+box-shadow: 0 1px 3px rgba(26,26,26,0.08);
+}
+.season-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 8px;
+}
+.season-name {
+font-family: ‘Shippori Mincho’, serif;
+font-weight: 600;
+font-size: 1rem;
+}
+.season-dates {
+font-size: 0.65rem;
+color: #a09890;
+}
+.season-stats {
+display: flex;
+gap: 16px;
+font-size: 0.8rem;
+}
+.season-stat-label { color: #6b6560; font-size: 0.65rem; }
+
+/* ── Season collection details ── */
+.season-collections {
+margin-top: 12px;
+padding-top: 10px;
+border-top: 1px solid #e8e0d0;
+}
+.season-collection-item {
+margin-bottom: 10px;
+}
+.season-collection-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+font-size: 0.75rem;
+font-weight: 500;
+margin-bottom: 4px;
+}
+.season-collection-date { color: #a09890; font-size: 0.65rem; }
+.season-member-row {
+display: flex;
+align-items: center;
+justify-content: space-between;
+padding: 3px 0;
+font-size: 0.75rem;
+}
+.season-member-name { color: #6b6560; }
+.season-member-paid { color: #2d6a4f; font-weight: 500; }
+.season-member-pending { color: #c23b22; font-weight: 500; }
+.season-toggle {
+font-size: 0.65rem;
+color: #a09890;
+cursor: pointer;
+text-align: center;
+padding: 6px 0 0;
+border: none;
+background: none;
+width: 100%;
+font-family: inherit;
+}
+
+/* ── History list ── */
+.history-empty {
+text-align: center;
+padding: 40px 20px;
+color: #a09890;
+}
+.history-empty .empty-kanji {
+font-family: ‘Shippori Mincho’, serif;
+font-size: 3rem;
+opacity: 0.2;
+margin-bottom: 8px;
+}
+.history-empty p {
+font-size: 0.8rem;
+}
+
+/* ── Toggle ── */
+.toggle-row {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 12px 0;
+border-bottom: 1px solid #e8e0d0;
+}
+.toggle-label { font-size: 0.85rem; }
+.toggle-sub { font-size: 0.65rem; color: #a09890; margin-top: 2px; }
+
+/* ── Divider ── */
+.divider {
+height: 1px;
+background: #e8e0d0;
+margin: 16px 0;
+}
+
+/* ── Settings info ── */
+.settings-info {
+font-size: 0.7rem;
+color: #a09890;
+text-align: center;
+padding: 20px;
+line-height: 1.6;
+}
+
+/* ── Ensō loader ── */
+.enso-wrap {
+display: flex;
+justify-content: center;
+padding: 20px;
+}
+.enso {
+width: 60px; height: 60px;
+border: 3px solid #e8e0d0;
+border-top-color: #c23b22;
+border-radius: 50%;
+animation: spin 1.2s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Confirm dialog ── */
+.confirm-actions { display: flex; gap: 10px; margin-top: 16px; }
+.confirm-actions .btn { flex:1; }
+.confirm-msg {
+text-align: center;
+font-size: 0.9rem;
+line-height: 1.6;
+padding: 8px 0;
+}
+
+/* ── Tab bar ── */
+.tab-bar {
+display: flex;
+gap: 4px;
+margin-bottom: 16px;
+background: #e8e0d0;
+border-radius: 8px;
+padding: 3px;
+}
+.tab-item {
+flex: 1;
+padding: 8px;
+text-align: center;
+font-size: 0.75rem;
+font-weight: 500;
+border: none;
+background: none;
+border-radius: 6px;
+cursor: pointer;
+color: #6b6560;
+font-family: inherit;
+transition: all 0.2s;
+}
+.tab-item.active {
+background: white;
+color: #1a1a1a;
+box-shadow: 0 1px 3px rgba(26,26,26,0.08);
+}
+
+/* ── Payment tracking ── */
+.payment-banner {
+background: white;
+border-radius: 12px;
+padding: 16px;
+margin-bottom: 20px;
+box-shadow: 0 1px 3px rgba(26,26,26,0.08);
+border-left: 3px solid #c23b22;
+}
+.payment-banner-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 10px;
+}
+.payment-banner-title {
+font-family: ‘Shippori Mincho’, serif;
+font-weight: 600;
+font-size: 0.9rem;
+}
+.payment-banner-amount {
+font-family: ‘Shippori Mincho’, serif;
+font-weight: 800;
+font-size: 0.9rem;
+color: #c23b22;
+}
+.payment-progress {
+height: 4px;
+background: #e8e0d0;
+border-radius: 2px;
+margin-bottom: 10px;
+overflow: hidden;
+}
+.payment-progress-bar {
+height: 100%;
+background: #2d6a4f;
+border-radius: 2px;
+transition: width 0.3s ease;
+}
+.payment-member-row {
+display: flex;
+align-items: center;
+justify-content: space-between;
+padding: 8px 0;
+border-bottom: 1px solid #e8e0d0;
+}
+.payment-member-row:last-child { border-bottom: none; }
+.payment-member-info {
+display: flex;
+align-items: center;
+gap: 10px;
+flex: 1;
+min-width: 0;
+}
+.payment-member-name {
+font-size: 0.85rem;
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
+}
+.payment-check {
+width: 28px; height: 28px;
+border-radius: 50%;
+border: 2px solid #e8e0d0;
+background: white;
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 0.8rem;
+color: transparent;
+transition: all 0.2s;
+flex-shrink: 0;
+-webkit-appearance: none;
+font-family: inherit;
+}
+.payment-check.paid {
+border-color: #2d6a4f;
+background: #2d6a4f;
+color: white;
+}
+.payment-counter {
+font-size: 0.7rem;
+color: #a09890;
+text-align: center;
+margin-top: 6px;
+}
+.payment-close-btn {
+margin-top: 10px;
+}
+
+/* member payment status dot */
+.member-status {
+display: flex;
+align-items: center;
+gap: 4px;
+font-size: 0.65rem;
+}
+.status-dot {
+width: 7px; height: 7px;
+border-radius: 50%;
+flex-shrink: 0;
+}
+.status-dot.paid { background: #2d6a4f; }
+.status-dot.pending { background: #c23b22; }
+
+/* ── Play type selected ── */
+.quick-play-btn.selected-euro { border-color: #1a56db; background: #e8f0fe; }
+.quick-play-btn.selected-primi { border-color: #b45309; background: #fef3e8; }
+
+/* ── Editable card hint ── */
+.card.editable { cursor: pointer; }
+.card.editable:active { transform: scale(0.97); background: #f5f0e8; }
+
+/* ── No-scroll body when modal open ── */
+body.modal-open { overflow: hidden; }
+</style>
+
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+
+<div class="header">
+  <div>
+    <div class="header-title"><span class="kanji">宝くじ</span> Takarakuji</div>
+    <div class="header-sub">Grupo de lotería</div>
+  </div>
+  <div class="hanko" onclick="openSettings()" title="Ajustes">設</div>
+</div>
+
+<!-- ═══ SCREEN: HOME ═══ -->
+
+<div id="screen-home" class="screen active">
+  <div class="fund-card">
+    <div class="fund-label">Fondo común · 共有基金</div>
+    <div class="fund-amount" id="fund-total">0,00<span class="currency">€</span></div>
+    <div class="fund-row">
+      <div class="fund-stat">
+        <div class="fund-stat-value" id="fund-members">0</div>
+        <div class="fund-stat-label">Miembros</div>
+      </div>
+      <div class="fund-stat">
+        <div class="fund-stat-value" id="fund-spent">0,00€</div>
+        <div class="fund-stat-label">Jugado</div>
+      </div>
+      <div class="fund-stat">
+        <div class="fund-stat-value" id="fund-won">0,00€</div>
+        <div class="fund-stat-label">Ganado</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment tracking (active collection) -->
+
+  <div id="payment-tracker"></div>
+
+  <!-- Season collections history -->
+
+  <div id="collections-history"></div>
+
+  <!-- Quick play -->
+
+  <div class="section-title"><span class="dot"></span>Registrar jugada · 記録</div>
+  <div class="quick-play">
+    <button class="quick-play-btn qp-euro-border" onclick="openPlayModal('euro')">
+      <div class="qp-icon qp-euro">€</div>
+      <div class="qp-name">Euromillón</div>
+      <div class="qp-price">2,50€ / columna</div>
+    </button>
+    <button class="quick-play-btn qp-primi-border" onclick="openPlayModal('primi')">
+      <div class="qp-icon qp-primi">P</div>
+      <div class="qp-name">Primitiva</div>
+      <div class="qp-price">1,00€ / columna</div>
+    </button>
+  </div>
+
+  <!-- Recent plays -->
+
+  <div class="section-title"><span class="dot"></span>Últimas jugadas</div>
+  <div id="recent-plays"></div>
+</div>
+
+<!-- ═══ SCREEN: MEMBERS ═══ -->
+
+<div id="screen-members" class="screen">
+  <div class="section-title"><span class="dot"></span>Miembros del grupo · 仲間</div>
+  <div id="members-list"></div>
+  <button class="btn btn-primary" onclick="openAddMemberModal()" style="margin-top:16px;">＋ Añadir miembro</button>
+</div>
+
+<!-- ═══ SCREEN: HISTORY ═══ -->
+
+<div id="screen-history" class="screen">
+  <div class="tab-bar">
+    <button class="tab-item active" onclick="switchHistoryTab('plays', this)">Jugadas</button>
+    <button class="tab-item" onclick="switchHistoryTab('wins', this)">Premios</button>
+    <button class="tab-item" onclick="switchHistoryTab('seasons', this)">Temporadas</button>
+  </div>
+  <div id="history-plays"></div>
+  <div id="history-wins" style="display:none;"></div>
+  <div id="history-seasons" style="display:none;"></div>
+</div>
+
+<!-- ═══ SCREEN: SETTINGS ═══ -->
+
+<div id="screen-settings" class="screen">
+  <div class="section-title"><span class="dot"></span>Gestión del fondo · 管理</div>
+
+<button class="btn btn-primary" onclick="openCollectModal()" style="margin-bottom:10px;">Recoger dinero · 集金</button>
+<button class="btn btn-outline" onclick="openAddWinModal()" style="margin-bottom:10px;">Registrar premio · 当選</button>
+<button class="btn btn-outline" onclick="openNewSeasonModal()" style="margin-bottom:10px;">Nueva temporada · 新季節</button>
+
+  <div class="divider"></div>
+
+  <div class="section-title"><span class="dot"></span>Datos · データ</div>
+  <button class="btn btn-outline" onclick="exportData()" style="margin-bottom:10px;">Exportar datos (JSON)</button>
+  <button class="btn btn-outline" onclick="document.getElementById('import-input').click()" style="margin-bottom:10px;">Importar datos</button>
+  <input type="file" id="import-input" accept=".json" style="display:none;" onchange="importData(event)">
+  <button class="btn btn-danger" onclick="confirmReset()">Borrar todo · リセット</button>
+
+  <div class="settings-info">
+    宝くじ · Takarakuji v1.1<br>
+    Diseñado con filosofía 和 · Wa<br>
+    El camino de la fortuna compartida
+  </div>
+</div>
+
+<!-- ═══ NAVIGATION ═══ -->
+
+<nav class="nav">
+  <button class="nav-item active" onclick="showScreen('home', this)">
+    <span class="nav-kanji">家</span>Inicio
+  </button>
+  <button class="nav-item" onclick="showScreen('members', this)">
+    <span class="nav-kanji">仲</span>Grupo
+  </button>
+  <button class="nav-item" onclick="showScreen('history', this)">
+    <span class="nav-kanji">帳</span>Historial
+  </button>
+  <button class="nav-item" onclick="showScreen('settings', this)">
+    <span class="nav-kanji">設</span>Ajustes
+  </button>
+</nav>
+
+<!-- ═══ MODAL: Add/Edit Play ═══ -->
+
+<div class="modal-overlay" id="modal-play">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="play-modal-title">Registrar jugada</div>
+    <div class="form-group">
+      <label class="form-label">Tipo de lotería</label>
+      <div class="quick-play" id="play-type-selector" style="margin-bottom:0;">
+        <button class="quick-play-btn qp-euro-border" id="play-type-euro" onclick="selectPlayType('euro')" style="padding:10px 8px;">
+          <div class="qp-icon qp-euro" style="font-size:1.2rem;">€</div>
+          <div class="qp-name">Euromillón</div>
+        </button>
+        <button class="quick-play-btn qp-primi-border" id="play-type-primi" onclick="selectPlayType('primi')" style="padding:10px 8px;">
+          <div class="qp-icon qp-primi" style="font-size:1.2rem;">P</div>
+          <div class="qp-name">Primitiva</div>
+        </button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Columnas</label>
+      <div class="columns-selector">
+        <button class="col-btn" onclick="changeColumns(-1)">−</button>
+        <div class="col-count" id="col-count">1</div>
+        <button class="col-btn" onclick="changeColumns(1)">＋</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Coste total</label>
+      <div style="text-align:center;">
+        <span id="play-cost" style="font-family:'Shippori Mincho',serif; font-size:1.8rem; font-weight:800;"></span>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Fecha del sorteo</label>
+      <input type="date" class="form-input" id="play-draw-date">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Nota (opcional)</label>
+      <input type="text" class="form-input" id="play-note" placeholder="Ej: Sorteo especial navidad">
+    </div>
+    <div class="btn-row" id="play-actions">
+      <button class="btn btn-outline" onclick="closeModal('modal-play')">Cancelar</button>
+      <button class="btn btn-primary" id="play-submit-btn" onclick="confirmPlay()">Registrar</button>
+    </div>
+    <button class="btn btn-danger" id="play-delete-btn" style="display:none; margin-top:8px;" onclick="deletePlay()">Eliminar jugada</button>
+  </div>
+</div>
+
+<!-- ═══ MODAL: Add/Edit Member ═══ -->
+
+<div class="modal-overlay" id="modal-member">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="member-modal-title">Nuevo miembro · 新仲間</div>
+    <div class="form-group">
+      <label class="form-label">Nombre</label>
+      <input type="text" class="form-input" id="member-name" placeholder="Nombre del compañero">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="closeModal('modal-member')">Cancelar</button>
+      <button class="btn btn-primary" id="member-submit-btn" onclick="addMember()">Añadir</button>
+    </div>
+    <button class="btn btn-danger" id="member-delete-btn" style="display:none; margin-top:8px;" onclick="deleteMemberFromEdit()">Eliminar miembro</button>
+  </div>
+</div>
+
+<!-- ═══ MODAL: Collect Money ═══ -->
+
+<div class="modal-overlay" id="modal-collect">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Recoger dinero · 集金</div>
+    <div class="form-group">
+      <label class="form-label">Cantidad por persona</label>
+      <input type="number" class="form-input" id="collect-amount" placeholder="0.00" step="0.5" min="0" inputmode="decimal" oninput="updateCollectPreview()">
+    </div>
+    <div id="collect-preview" style="text-align:center; margin-bottom:12px;">
+      <div style="font-family:'Shippori Mincho',serif; font-size:1.6rem; font-weight:800;" id="collect-total-preview">0,00€</div>
+      <div style="font-size:0.7rem; color:#a09890;" id="collect-detail-preview">Total para 0 miembros</div>
+    </div>
+    <div class="form-group" id="collect-info" style="font-size:0.8rem; color:#c23b22; text-align:center;"></div>
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="closeModal('modal-collect')">Cancelar</button>
+      <button class="btn btn-primary" id="collect-submit-btn" onclick="startCollection()">Iniciar recogida</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: Add Win ═══ -->
+
+<div class="modal-overlay" id="modal-win">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="win-modal-title">Registrar premio · 当選</div>
+    <div class="form-group">
+      <label class="form-label">Cantidad ganada</label>
+      <input type="number" class="form-input" id="win-amount" placeholder="0.00" step="0.01" min="0" inputmode="decimal">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Vincular a sorteo</label>
+      <select class="form-input" id="win-source" onchange="onWinSourceChange()">
+        <option value="">— Seleccionar jugada —</option>
+      </select>
+    </div>
+    <div class="form-group" id="win-manual-date-group" style="display:none;">
+      <label class="form-label">Fecha del sorteo</label>
+      <input type="date" class="form-input" id="win-draw-date">
+    </div>
+    <div class="form-group" id="win-manual-type-group" style="display:none;">
+      <label class="form-label">Tipo de lotería</label>
+      <select class="form-input" id="win-type">
+        <option value="euro">Euromillón</option>
+        <option value="primi">Primitiva</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Nota (opcional)</label>
+      <input type="text" class="form-input" id="win-note" placeholder="Ej: 2 aciertos + estrellas">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="closeModal('modal-win')">Cancelar</button>
+      <button class="btn btn-vermillion" id="win-submit-btn" onclick="addWin()">Registrar premio</button>
+    </div>
+    <button class="btn btn-danger" id="win-delete-btn" style="display:none; margin-top:8px;" onclick="deleteWin()">Eliminar premio</button>
+  </div>
+</div>
+
+<!-- ═══ MODAL: New Season ═══ -->
+
+<div class="modal-overlay" id="modal-season">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Nueva temporada · 新季節</div>
+    <div class="confirm-msg">
+      Se archivará la temporada actual con su balance.<br>
+      El saldo del fondo <strong>se mantiene</strong> para la siguiente temporada.<br>
+      Se iniciará una nueva temporada desde cero en jugadas.
+    </div>
+    <div class="form-group">
+      <label class="form-label">Nombre de la nueva temporada</label>
+      <input type="text" class="form-input" id="season-name" placeholder="Ej: Primavera 2026">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="closeModal('modal-season')">Cancelar</button>
+      <button class="btn btn-primary" onclick="startNewSeason()">Iniciar temporada</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: Confirm ═══ -->
+
+<div class="modal-overlay" id="modal-confirm">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="confirm-title">Confirmar</div>
+    <div class="confirm-msg" id="confirm-msg"></div>
+    <div class="confirm-actions">
+      <button class="btn btn-outline" onclick="closeModal('modal-confirm')">Cancelar</button>
+      <button class="btn btn-danger" id="confirm-btn" onclick="">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: Export ═══ -->
+
+<div class="modal-overlay" id="modal-export">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Exportar datos · 保存</div>
+    <div class="form-group">
+      <label class="form-label">Nombre del archivo</label>
+      <input type="text" class="form-input" id="export-filename" placeholder="takarakuji_backup">
+    </div>
+    <div style="font-size:0.7rem; color:#a09890; text-align:center; margin-bottom:12px;">.json se añade automáticamente</div>
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="closeModal('modal-export')">Cancelar</button>
+      <button class="btn btn-primary" onclick="doExport()">Exportar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════
+// DATA MODEL
+// ═══════════════════════════════════
+const STORAGE_KEY = 'takarakuji_data';
+const PRICES = { euro: 2.50, primi: 1.00 };
+const LABELS = { euro: 'Euromillón', primi: 'Primitiva' };
+
+function defaultData() {
+  return {
+    members: [],
+    fund: 0,
+    totalCollected: 0,
+    plays: [],
+    wins: [],
+    seasons: [],
+    collections: [],
+    // carryover: accumulated balance from all archived seasons
+    carryover: 0,
+    currentSeason: { name: 'Temporada 1', startDate: new Date().toISOString(), spent: 0, won: 0, collected: 0 }
+  };
+}
+
+let data = loadData();
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const d = JSON.parse(raw);
+      if (!d.currentSeason) d.currentSeason = { name: 'Temporada 1', startDate: new Date().toISOString(), spent: 0, won: 0, collected: 0 };
+      if (!d.seasons) d.seasons = [];
+      if (!d.totalCollected) d.totalCollected = 0;
+      if (!d.wins) d.wins = [];
+      if (!d.collections) d.collections = [];
+      // Migration: compute carryover from archived seasons if not present
+      if (d.carryover === undefined) {
+        let carry = 0;
+        d.seasons.forEach(s => {
+          carry += (s.collected || 0) - (s.spent || 0) + (s.won || 0);
+        });
+        d.carryover = Math.round(carry * 100) / 100;
+      }
+      return d;
+    }
+  } catch(e) {}
+  return defaultData();
+}
+
+function recalcFund() {
+  // Current season: calculated from live data (plays, wins, current collections)
+  const totalSpent = data.plays.reduce((s, p) => s + p.amount, 0);
+  const totalWon = data.wins.reduce((s, w) => s + w.amount, 0);
+
+  // Current season collections only (filtered by season start date)
+  const seasonStart = new Date(data.currentSeason.startDate).getTime();
+  let seasonCollected = 0;
+  data.collections.forEach(c => {
+    if (new Date(c.date).getTime() >= seasonStart) {
+      Object.values(c.payments).forEach(paid => {
+        if (paid) seasonCollected += c.amount;
+      });
+    }
+  });
+  seasonCollected = Math.round(seasonCollected * 100) / 100;
+
+  data.currentSeason.spent = Math.round(totalSpent * 100) / 100;
+  data.currentSeason.won = Math.round(totalWon * 100) / 100;
+  data.currentSeason.collected = seasonCollected;
+
+  // FIX: Fund = carryover from archived seasons + current season net
+  const currentBalance = seasonCollected - totalSpent + totalWon;
+  data.fund = Math.round((data.carryover + currentBalance) * 100) / 100;
+
+  // All-time collected (for reference)
+  let allTimeCollected = seasonCollected;
+  data.seasons.forEach(s => { allTimeCollected += (s.collected || 0); });
+  data.totalCollected = Math.round(allTimeCollected * 100) / 100;
+}
+
+function saveData() {
+  recalcFund();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+// ═══════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════
+function showScreen(name, btn) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  if (name === 'home') renderHome();
+  if (name === 'members') renderMembers();
+  if (name === 'history') renderHistory();
+}
+
+function openSettings() {
+  showScreen('settings');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.nav-item')[3].classList.add('active');
+}
+
+// ═══════════════════════════════════
+// MODALS
+// ═══════════════════════════════════
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+  document.body.classList.add('modal-open');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  document.body.classList.remove('modal-open');
+}
+document.querySelectorAll('.modal-overlay').forEach(ov => {
+  ov.addEventListener('click', (e) => {
+    if (e.target === ov) {
+      ov.classList.remove('open');
+      document.body.classList.remove('modal-open');
+    }
+  });
+});
+
+// ═══════════════════════════════════
+// HOME SCREEN
+// ═══════════════════════════════════
+function renderHome() {
+  document.getElementById('fund-total').innerHTML = formatMoney(data.fund) + '<span class="currency">€</span>';
+  document.getElementById('fund-members').textContent = data.members.length;
+  document.getElementById('fund-spent').textContent = formatMoney(data.currentSeason.spent) + '€';
+
+  const wonEl = document.getElementById('fund-won');
+  wonEl.textContent = formatMoney(data.currentSeason.won) + '€';
+  wonEl.className = 'fund-stat-value ' + (data.currentSeason.won > 0 ? 'positive' : '');
+
+  renderPaymentTracker();
+  renderCollectionsHistory();
+
+  const recent = [...data.plays].reverse().slice(0, 5);
+  const container = document.getElementById('recent-plays');
+  if (recent.length === 0) {
+    container.innerHTML = '<div class="history-empty"><div class="empty-kanji">無</div><p>Sin jugadas aún. El camino comienza con el primer paso.</p></div>';
+    return;
+  }
+  container.innerHTML = recent.map(p => `
+    <div class="card play-entry editable" onclick="editPlay(${p.id})">
+      <div class="play-info">
+        <div class="play-type">${LABELS[p.type]} <span class="badge ${p.type === 'euro' ? 'badge-euro' : 'badge-primi'}">${p.columns} col.</span></div>
+        <div class="play-date">${p.drawDate ? formatDrawDate(p.drawDate) : formatDate(p.date)}${p.note ? ' · ' + p.note : ''}</div>
+      </div>
+      <div class="play-amount">−${formatMoney(p.amount)}€</div>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════
+// PLAY MODAL (create & edit)
+// ═══════════════════════════════════
+let currentPlayType = 'euro';
+let currentColumns = 1;
+let editingPlayId = null;
+
+function selectPlayType(type) {
+  currentPlayType = type;
+  document.getElementById('play-type-euro').className = 'quick-play-btn qp-euro-border' + (type === 'euro' ? ' selected-euro' : '');
+  document.getElementById('play-type-primi').className = 'quick-play-btn qp-primi-border' + (type === 'primi' ? ' selected-primi' : '');
+  document.getElementById('play-cost').textContent = formatMoney(currentColumns * PRICES[currentPlayType]) + '€';
+}
+
+function openPlayModal(type) {
+  editingPlayId = null;
+  currentPlayType = type;
+  currentColumns = 1;
+  selectPlayType(type);
+  document.getElementById('play-modal-title').textContent = 'Registrar jugada · 記録';
+  document.getElementById('col-count').textContent = '1';
+  document.getElementById('play-cost').textContent = formatMoney(PRICES[type]) + '€';
+  document.getElementById('play-note').value = '';
+  document.getElementById('play-draw-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('play-submit-btn').textContent = 'Registrar';
+  document.getElementById('play-delete-btn').style.display = 'none';
+  openModal('modal-play');
+}
+
+function editPlay(playId) {
+  const play = data.plays.find(p => p.id === playId);
+  if (!play) return;
+  editingPlayId = playId;
+  currentPlayType = play.type;
+  currentColumns = play.columns;
+  selectPlayType(play.type);
+  document.getElementById('play-modal-title').textContent = 'Editar jugada · 編集';
+  document.getElementById('col-count').textContent = play.columns;
+  document.getElementById('play-cost').textContent = formatMoney(play.amount) + '€';
+  document.getElementById('play-note').value = play.note || '';
+  document.getElementById('play-draw-date').value = play.drawDate || '';
+  document.getElementById('play-submit-btn').textContent = 'Guardar';
+  document.getElementById('play-delete-btn').style.display = 'block';
+  openModal('modal-play');
+}
+
+function changeColumns(delta) {
+  currentColumns = Math.max(1, currentColumns + delta);
+  document.getElementById('col-count').textContent = currentColumns;
+  document.getElementById('play-cost').textContent = formatMoney(currentColumns * PRICES[currentPlayType]) + '€';
+}
+
+function confirmPlay() {
+  const amount = currentColumns * PRICES[currentPlayType];
+  const note = document.getElementById('play-note').value.trim();
+  const drawDate = document.getElementById('play-draw-date').value || null;
+
+  if (editingPlayId) {
+    const play = data.plays.find(p => p.id === editingPlayId);
+    if (!play) return;
+    play.type = currentPlayType;
+    play.columns = currentColumns;
+    play.amount = amount;
+    play.note = note;
+    play.drawDate = drawDate;
+  } else {
+    data.plays.push({
+      id: Date.now(),
+      type: currentPlayType,
+      columns: currentColumns,
+      amount, note, drawDate,
+      date: new Date().toISOString()
+    });
+  }
+
+  saveData();
+  closeModal('modal-play');
+  editingPlayId = null;
+  renderHome();
+}
+
+function deletePlay() {
+  if (!editingPlayId) return;
+  data.plays = data.plays.filter(p => p.id !== editingPlayId);
+  saveData();
+  closeModal('modal-play');
+  editingPlayId = null;
+  renderHome();
+}
+
+// ═══════════════════════════════════
+// MEMBERS (create & edit)
+// ═══════════════════════════════════
+let editingMemberIndex = null;
+
+function renderMembers() {
+  const container = document.getElementById('members-list');
+  if (data.members.length === 0) {
+    container.innerHTML = '<div class="history-empty"><div class="empty-kanji">空</div><p>El grupo está vacío. Añade a tus compañeros.</p></div>';
+    return;
+  }
+  const active = getActiveCollection();
+  container.innerHTML = data.members.map((m, i) => {
+    let statusHtml = '';
+    if (active && active.payments.hasOwnProperty(m.name)) {
+      const paid = active.payments[m.name];
+      statusHtml = `<div class="member-status"><span class="status-dot ${paid ? 'paid' : 'pending'}"></span>${paid ? 'Pagado' : 'Pendiente'}</div>`;
+    }
+    return `
+    <div class="card member-card editable" onclick="editMember(${i})">
+      <div class="member-info">
+        <div class="member-avatar">${m.name.charAt(0).toUpperCase()}</div>
+        <div>
+          <div class="member-name">${escapeHtml(m.name)}</div>
+          <div class="member-since">Desde ${formatDateShort(m.joinDate)}${statusHtml ? ' · ' : ''}${statusHtml}</div>
+        </div>
+      </div>
+    </div>
+  `}).join('');
+}
+
+function openAddMemberModal() {
+  editingMemberIndex = null;
+  document.getElementById('member-modal-title').textContent = 'Nuevo miembro · 新仲間';
+  document.getElementById('member-name').value = '';
+  document.getElementById('member-submit-btn').textContent = 'Añadir';
+  document.getElementById('member-submit-btn').onclick = addMember;
+  document.getElementById('member-delete-btn').style.display = 'none';
+  openModal('modal-member');
+  setTimeout(() => document.getElementById('member-name').focus(), 300);
+}
+
+function editMember(index) {
+  editingMemberIndex = index;
+  const m = data.members[index];
+  document.getElementById('member-modal-title').textContent = 'Editar miembro · 編集';
+  document.getElementById('member-name').value = m.name;
+  document.getElementById('member-submit-btn').textContent = 'Guardar';
+  document.getElementById('member-submit-btn').onclick = saveMemberEdit;
+  document.getElementById('member-delete-btn').style.display = 'block';
+  openModal('modal-member');
+  setTimeout(() => document.getElementById('member-name').focus(), 300);
+}
+
+function addMember() {
+  const name = document.getElementById('member-name').value.trim();
+  if (!name) return;
+  // FIX: Prevent duplicate names
+  if (data.members.some(m => m.name.toLowerCase() === name.toLowerCase())) {
+    alert('Ya existe un miembro con ese nombre.');
+    return;
+  }
+  data.members.push({ name, joinDate: new Date().toISOString() });
+  // Add to active collection if one exists
+  const active = getActiveCollection();
+  if (active && !active.payments.hasOwnProperty(name)) {
+    active.payments[name] = false;
+  }
+  saveData();
+  closeModal('modal-member');
+  renderMembers();
+  renderHome();
+}
+
+function saveMemberEdit() {
+  if (editingMemberIndex === null) return;
+  const newName = document.getElementById('member-name').value.trim();
+  if (!newName) return;
+  const oldName = data.members[editingMemberIndex].name;
+  // FIX: Prevent duplicate names (excluding self)
+  if (oldName !== newName && data.members.some(m => m.name.toLowerCase() === newName.toLowerCase())) {
+    alert('Ya existe un miembro con ese nombre.');
+    return;
+  }
+  data.members[editingMemberIndex].name = newName;
+  // FIX: Update name in ALL collections (active and closed), not just active
+  if (oldName !== newName) {
+    data.collections.forEach(c => {
+      if (c.payments.hasOwnProperty(oldName)) {
+        c.payments[newName] = c.payments[oldName];
+        delete c.payments[oldName];
+      }
+    });
+  }
+  saveData();
+  closeModal('modal-member');
+  editingMemberIndex = null;
+  renderMembers();
+  renderHome();
+}
+
+function deleteMemberFromEdit() {
+  if (editingMemberIndex === null) return;
+  const removedName = data.members[editingMemberIndex].name;
+
+  // FIX: Remove from active (open) collections only.
+  // Closed collections keep the historical record — the money was or wasn't collected.
+  data.collections.forEach(c => {
+    if (!c.closed && c.payments.hasOwnProperty(removedName)) {
+      delete c.payments[removedName];
+    }
+  });
+
+  data.members.splice(editingMemberIndex, 1);
+  saveData();
+  closeModal('modal-member');
+  editingMemberIndex = null;
+  renderMembers();
+  renderHome();
+}
+
+function confirmRemoveMember(index) {
+  const member = data.members[index];
+  document.getElementById('confirm-title').textContent = 'Eliminar miembro';
+  document.getElementById('confirm-msg').innerHTML = `¿Eliminar a <strong>${escapeHtml(member.name)}</strong> del grupo?`;
+  document.getElementById('confirm-btn').onclick = () => {
+    const removedName = data.members[index].name;
+    data.collections.forEach(c => {
+      if (!c.closed && c.payments.hasOwnProperty(removedName)) {
+        delete c.payments[removedName];
+      }
+    });
+    data.members.splice(index, 1);
+    saveData();
+    closeModal('modal-confirm');
+    renderMembers();
+    renderHome();
+  };
+  openModal('modal-confirm');
+}
+
+// ═══════════════════════════════════
+// COLLECT MONEY & PAYMENT TRACKING
+// ═══════════════════════════════════
+function getActiveCollection() {
+  return data.collections.find(c => !c.closed);
+}
+
+function openCollectModal() {
+  const active = getActiveCollection();
+  if (active) {
+    showScreen('home');
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('.nav-item')[0].classList.add('active');
+    return;
+  }
+  document.getElementById('collect-amount').value = '';
+  const n = data.members.length;
+  const infoEl = document.getElementById('collect-info');
+  const submitBtn = document.getElementById('collect-submit-btn');
+  if (n === 0) {
+    infoEl.textContent = 'Añade miembros al grupo antes de recoger dinero.';
+    submitBtn.disabled = true;
+    submitBtn.style.opacity = '0.4';
+  } else {
+    infoEl.textContent = '';
+    submitBtn.disabled = false;
+    submitBtn.style.opacity = '1';
+  }
+  updateCollectPreview();
+  openModal('modal-collect');
+}
+
+function updateCollectPreview() {
+  const amount = parseFloat(document.getElementById('collect-amount').value) || 0;
+  const n = data.members.length;
+  const total = Math.round(amount * n * 100) / 100;
+  document.getElementById('collect-total-preview').textContent = formatMoney(total) + '€';
+  document.getElementById('collect-detail-preview').textContent = n > 0
+    ? formatMoney(amount) + '€ × ' + n + ' miembros'
+    : 'No hay miembros en el grupo';
+}
+
+function startCollection() {
+  const perPerson = parseFloat(document.getElementById('collect-amount').value);
+  if (isNaN(perPerson) || perPerson <= 0) return;
+  if (data.members.length === 0) return;
+
+  const payments = {};
+  data.members.forEach(m => { payments[m.name] = false; });
+
+  data.collections.push({
+    id: Date.now(),
+    amount: perPerson,
+    date: new Date().toISOString(),
+    payments: payments,
+    closed: false
+  });
+
+  saveData();
+  closeModal('modal-collect');
+  renderHome();
+}
+
+function togglePayment(memberName) {
+  const active = getActiveCollection();
+  if (!active) return;
+  active.payments[memberName] = !active.payments[memberName];
+  saveData();
+  renderHome();
+}
+
+function closeCollection() {
+  const active = getActiveCollection();
+  if (!active) return;
+  active.closed = true;
+  saveData();
+  renderHome();
+}
+
+function renderPaymentTracker() {
+  const container = document.getElementById('payment-tracker');
+  const active = getActiveCollection();
+
+  if (!active) {
+    container.innerHTML = '';
+    return;
+  }
+
+  const members = Object.keys(active.payments);
+  const paidCount = members.filter(m => active.payments[m]).length;
+  const totalCount = members.length;
+  const allPaid = paidCount === totalCount && totalCount > 0;
+  const pct = totalCount > 0 ? (paidCount / totalCount * 100) : 0;
+
+  container.innerHTML = `
+    <div class="payment-banner">
+      <div class="payment-banner-header">
+        <div class="payment-banner-title">集金 · Recogida activa</div>
+        <div class="payment-banner-amount">${formatMoney(active.amount)}€ / persona</div>
+      </div>
+      <div class="payment-progress">
+        <div class="payment-progress-bar" style="width:${pct}%"></div>
+      </div>
+      ${members.map((name, i) => `
+        <div class="payment-member-row">
+          <div class="payment-member-info">
+            <div class="member-avatar" style="width:30px;height:30px;font-size:0.75rem;">${name.charAt(0).toUpperCase()}</div>
+            <div class="payment-member-name">${escapeHtml(name)}</div>
+          </div>
+          <button class="payment-check ${active.payments[name] ? 'paid' : ''}" data-payment-index="${i}">
+            ${active.payments[name] ? '✓' : ''}
+          </button>
+        </div>
+      `).join('')}
+      <div class="payment-counter">${paidCount} de ${totalCount} han pagado${allPaid ? ' · ¡Todos al día!' : ''}</div>
+      ${allPaid ? `<button class="btn btn-outline btn-sm payment-close-btn" onclick="closeCollection()" style="width:100%;margin-top:10px;">Cerrar recogida</button>` : ''}
+    </div>
+  `;
+
+  container.querySelectorAll('[data-payment-index]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.getAttribute('data-payment-index'));
+      const memberName = members[idx];
+      if (memberName) togglePayment(memberName);
+    });
+  });
+}
+
+function renderCollectionsHistory() {
+  const container = document.getElementById('collections-history');
+  const seasonStart = new Date(data.currentSeason.startDate).getTime();
+  const closedCollections = data.collections.filter(c =>
+    c.closed && new Date(c.date).getTime() >= seasonStart
+  ).reverse();
+
+  if (closedCollections.length === 0) {
+    container.innerHTML = '';
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="section-title"><span class="dot"></span>Recogidas · 集金履歴</div>
+    ${closedCollections.map(c => {
+      const members = Object.keys(c.payments);
+      const paidCount = members.filter(m => c.payments[m]).length;
+      const totalCount = members.length;
+      return `
+      <div class="card" style="margin-bottom:10px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <span style="font-family:'Shippori Mincho',serif; font-weight:600; font-size:0.9rem;">${formatMoney(c.amount)}€ / persona</span>
+          <span style="font-size:0.65rem; color:#a09890;">${formatDateShort(c.date)} · ${paidCount}/${totalCount}</span>
+        </div>
+        ${members.map(name => `
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0; font-size:0.8rem;">
+            <span style="color:#6b6560;">${escapeHtml(name)}</span>
+            <span style="font-weight:500; color:${c.payments[name] ? '#2d6a4f' : '#c23b22'};">${c.payments[name] ? '✓ Pagado' : '✕ Pendiente'}</span>
+          </div>
+        `).join('')}
+      </div>
+    `}).join('')}
+  `;
+}
+
+// ═══════════════════════════════════
+// WIN (create & edit)
+// ═══════════════════════════════════
+let editingWinId = null;
+
+function populateWinSourceDropdown(selectedPlayId) {
+  const select = document.getElementById('win-source');
+  const plays = [...data.plays].reverse();
+  let options = '<option value="">— Seleccionar jugada —</option>';
+  options += '<option value="__manual__">Introducir fecha manualmente</option>';
+  plays.forEach(p => {
+    const dateLabel = p.drawDate ? formatDrawDate(p.drawDate) : formatDateShort(p.date);
+    const sel = (selectedPlayId && p.id === selectedPlayId) ? ' selected' : '';
+    options += `<option value="${p.id}" data-type="${p.type}"${sel}>${LABELS[p.type]} · ${dateLabel}${p.note ? ' · ' + p.note : ''}</option>`;
+  });
+  select.innerHTML = options;
+}
+
+function openAddWinModal() {
+  editingWinId = null;
+  document.getElementById('win-modal-title').textContent = 'Registrar premio · 当選';
+  document.getElementById('win-amount').value = '';
+  document.getElementById('win-note').value = '';
+  populateWinSourceDropdown(null);
+  document.getElementById('win-manual-date-group').style.display = 'none';
+  document.getElementById('win-manual-type-group').style.display = 'none';
+  document.getElementById('win-draw-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('win-submit-btn').textContent = 'Registrar premio';
+  document.getElementById('win-delete-btn').style.display = 'none';
+  openModal('modal-win');
+}
+
+function editWin(winId) {
+  const win = data.wins.find(w => w.id === winId);
+  if (!win) return;
+  editingWinId = winId;
+  document.getElementById('win-modal-title').textContent = 'Editar premio · 編集';
+  document.getElementById('win-amount').value = win.amount;
+  document.getElementById('win-note').value = win.note || '';
+
+  if (win.linkedPlayId) {
+    populateWinSourceDropdown(win.linkedPlayId);
+    document.getElementById('win-manual-date-group').style.display = 'none';
+    document.getElementById('win-manual-type-group').style.display = 'none';
+  } else if (win.drawDate) {
+    populateWinSourceDropdown(null);
+    document.getElementById('win-source').value = '__manual__';
+    document.getElementById('win-manual-date-group').style.display = 'block';
+    document.getElementById('win-manual-type-group').style.display = 'block';
+    document.getElementById('win-draw-date').value = win.drawDate;
+    document.getElementById('win-type').value = win.type;
+  } else {
+    populateWinSourceDropdown(null);
+    document.getElementById('win-manual-date-group').style.display = 'none';
+    document.getElementById('win-manual-type-group').style.display = 'none';
+  }
+
+  document.getElementById('win-submit-btn').textContent = 'Guardar';
+  document.getElementById('win-delete-btn').style.display = 'block';
+  openModal('modal-win');
+}
+
+function onWinSourceChange() {
+  const val = document.getElementById('win-source').value;
+  const isManual = val === '__manual__';
+  document.getElementById('win-manual-date-group').style.display = isManual ? 'block' : 'none';
+  document.getElementById('win-manual-type-group').style.display = isManual ? 'block' : 'none';
+}
+
+function addWin() {
+  const amount = parseFloat(document.getElementById('win-amount').value);
+  if (isNaN(amount) || amount <= 0) return;
+
+  const sourceVal = document.getElementById('win-source').value;
+  const note = document.getElementById('win-note').value.trim();
+  let type, drawDate, linkedPlayId;
+
+  if (sourceVal && sourceVal !== '__manual__') {
+    linkedPlayId = parseInt(sourceVal);
+    const play = data.plays.find(p => p.id === linkedPlayId);
+    if (play) { type = play.type; drawDate = play.drawDate || null; }
+    else { type = 'euro'; drawDate = null; }
+  } else if (sourceVal === '__manual__') {
+    type = document.getElementById('win-type').value;
+    drawDate = document.getElementById('win-draw-date').value || null;
+    linkedPlayId = null;
+  } else {
+    type = 'euro'; drawDate = null; linkedPlayId = null;
+  }
+
+  if (editingWinId) {
+    const win = data.wins.find(w => w.id === editingWinId);
+    if (!win) return;
+    win.amount = amount;
+    win.type = type;
+    win.note = note;
+    win.drawDate = drawDate;
+    win.linkedPlayId = linkedPlayId || null;
+  } else {
+    data.wins.push({
+      id: Date.now(), amount, type, note, drawDate,
+      linkedPlayId: linkedPlayId || null,
+      date: new Date().toISOString()
+    });
+  }
+
+  saveData();
+  closeModal('modal-win');
+  editingWinId = null;
+  renderHome();
+}
+
+function deleteWin() {
+  if (!editingWinId) return;
+  data.wins = data.wins.filter(w => w.id !== editingWinId);
+  saveData();
+  closeModal('modal-win');
+  editingWinId = null;
+  renderHome();
+}
+
+// ═══════════════════════════════════
+// SEASONS
+// ═══════════════════════════════════
+function openNewSeasonModal() {
+  document.getElementById('season-name').value = '';
+  openModal('modal-season');
+}
+
+function startNewSeason() {
+  const name = document.getElementById('season-name').value.trim() || ('Temporada ' + (data.seasons.length + 2));
+
+  // Close any active collection first
+  const active = getActiveCollection();
+  if (active) active.closed = true;
+
+  // Recalc to get accurate numbers before archiving
+  recalcFund();
+
+  // Get collections that belong to this season (for the archive snapshot)
+  const seasonStart = new Date(data.currentSeason.startDate).getTime();
+  const seasonCollections = data.collections.filter(c => new Date(c.date).getTime() >= seasonStart);
+
+  // FIX: Calculate current season's net balance and accumulate into carryover
+  const seasonBalance = data.currentSeason.collected - data.currentSeason.spent + data.currentSeason.won;
+  data.carryover = Math.round((data.carryover + seasonBalance) * 100) / 100;
+
+  // Archive current season
+  data.seasons.push({
+    ...data.currentSeason,
+    endDate: new Date().toISOString(),
+    plays: data.plays.length,
+    balance: Math.round(seasonBalance * 100) / 100,
+    collections: JSON.parse(JSON.stringify(seasonCollections))
+  });
+
+  // Start fresh season — fund persists via carryover
+  data.currentSeason = {
+    name,
+    startDate: new Date().toISOString(),
+    spent: 0,
+    won: 0,
+    collected: 0
+  };
+  data.plays = [];
+  data.wins = [];
+
+  saveData();
+  closeModal('modal-season');
+  renderHome();
+}
+
+// ═══════════════════════════════════
+// HISTORY
+// ═══════════════════════════════════
+function switchHistoryTab(tab, btn) {
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('history-plays').style.display = tab === 'plays' ? 'block' : 'none';
+  document.getElementById('history-wins').style.display = tab === 'wins' ? 'block' : 'none';
+  document.getElementById('history-seasons').style.display = tab === 'seasons' ? 'block' : 'none';
+  renderHistory();
+}
+
+function renderHistory() {
+  // Plays
+  const playsContainer = document.getElementById('history-plays');
+  const plays = [...data.plays].reverse();
+  if (plays.length === 0) {
+    playsContainer.innerHTML = '<div class="history-empty"><div class="empty-kanji">帳</div><p>El libro de cuentas está limpio.</p></div>';
+  } else {
+    playsContainer.innerHTML = plays.map(p => `
+      <div class="card play-entry editable" onclick="editPlay(${p.id})">
+        <div class="play-info">
+          <div class="play-type">${LABELS[p.type]} <span class="badge ${p.type === 'euro' ? 'badge-euro' : 'badge-primi'}">${p.columns} col.</span></div>
+          <div class="play-date">${p.drawDate ? formatDrawDate(p.drawDate) : formatDate(p.date)}${p.note ? ' · ' + p.note : ''}</div>
+        </div>
+        <div class="play-amount">−${formatMoney(p.amount)}€</div>
+      </div>
+    `).join('');
+  }
+
+  // Wins
+  const winsContainer = document.getElementById('history-wins');
+  const wins = [...data.wins].reverse();
+  if (wins.length === 0) {
+    winsContainer.innerHTML = '<div class="history-empty"><div class="empty-kanji">福</div><p>La fortuna aún no ha llegado. Paciencia.</p></div>';
+  } else {
+    winsContainer.innerHTML = wins.map(w => {
+      let dateLabel = '';
+      if (w.drawDate) {
+        dateLabel = formatDrawDate(w.drawDate);
+      } else if (w.linkedPlayId) {
+        const linked = data.plays.find(p => p.id === w.linkedPlayId);
+        dateLabel = linked && linked.drawDate ? formatDrawDate(linked.drawDate) : formatDate(w.date);
+      } else {
+        dateLabel = formatDate(w.date);
+      }
+      return `
+      <div class="card play-entry editable" onclick="editWin(${w.id})">
+        <div class="play-info">
+          <div class="play-type">${LABELS[w.type]} <span class="badge ${w.type === 'euro' ? 'badge-euro' : 'badge-primi'}">PREMIO</span></div>
+          <div class="play-date">${dateLabel}${w.note ? ' · ' + w.note : ''}</div>
+        </div>
+        <div class="play-amount win-amount">+${formatMoney(w.amount)}€</div>
+      </div>
+    `}).join('');
+  }
+
+  // Seasons
+  const seasonsContainer = document.getElementById('history-seasons');
+  const allSeasons = [...data.seasons].reverse();
+
+  const seasonStart = new Date(data.currentSeason.startDate).getTime();
+  const currentCollections = data.collections.filter(c => new Date(c.date).getTime() >= seasonStart);
+
+  const currentHtml = `
+    <div class="season-card" style="border-left: 3px solid #c23b22;">
+      <div class="season-header">
+        <div class="season-name">${escapeHtml(data.currentSeason.name)} <span style="font-size:0.65rem; color:#c23b22;">ACTIVA</span></div>
+        <div class="season-dates">Desde ${formatDateShort(data.currentSeason.startDate)}</div>
+      </div>
+      <div class="season-stats">
+        <div><div class="season-stat-label">Recaudado</div>${formatMoney(data.currentSeason.collected || 0)}€</div>
+        <div><div class="season-stat-label">Jugado</div>${formatMoney(data.currentSeason.spent)}€</div>
+        <div><div class="season-stat-label">Ganado</div>${formatMoney(data.currentSeason.won)}€</div>
+      </div>
+      ${data.carryover !== 0 ? `<div style="font-size:0.7rem; color:#6b6560; margin-top:8px; padding-top:8px; border-top:1px solid #e8e0d0;">Saldo arrastrado: <strong style="color:${data.carryover >= 0 ? '#2d6a4f' : '#c23b22'};">${data.carryover >= 0 ? '+' : ''}${formatMoney(data.carryover)}€</strong></div>` : ''}
+      ${renderSeasonCollections(currentCollections, 'current')}
+    </div>
+  `;
+
+  const pastHtml = allSeasons.map((s, i) => `
+    <div class="season-card">
+      <div class="season-header">
+        <div class="season-name">${escapeHtml(s.name)}</div>
+        <div class="season-dates">${formatDateShort(s.startDate)} → ${formatDateShort(s.endDate)}</div>
+      </div>
+      <div class="season-stats">
+        <div><div class="season-stat-label">Recaudado</div>${formatMoney(s.collected || 0)}€</div>
+        <div><div class="season-stat-label">Jugado</div>${formatMoney(s.spent)}€</div>
+        <div><div class="season-stat-label">Balance</div><span class="${s.balance >= 0 ? 'positive' : 'negative'}">${s.balance >= 0 ? '+' : ''}${formatMoney(s.balance)}€</span></div>
+      </div>
+      ${s.collections ? renderSeasonCollections(s.collections, 'past-' + i) : ''}
+    </div>
+  `).join('');
+  seasonsContainer.innerHTML = currentHtml + (allSeasons.length > 0 ? pastHtml : '<div style="text-align:center;font-size:0.75rem;color:#a09890;padding:12px;">Sin temporadas archivadas</div>');
+
+  seasonsContainer.querySelectorAll('.season-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = document.getElementById(btn.getAttribute('data-target'));
+      if (target) {
+        const isHidden = target.style.display === 'none';
+        target.style.display = isHidden ? 'block' : 'none';
+        btn.textContent = isHidden ? '▲ Ocultar recogidas' : '▼ Ver recogidas (' + btn.getAttribute('data-count') + ')';
+      }
+    });
+  });
+}
+
+function renderSeasonCollections(collections, prefix) {
+  if (!collections || collections.length === 0) return '';
+
+  const detailsHtml = collections.map((c, j) => {
+    const members = Object.keys(c.payments);
+    const paidCount = members.filter(m => c.payments[m]).length;
+    const totalCount = members.length;
+    return `
+      <div class="season-collection-item">
+        <div class="season-collection-header">
+          <span>${formatMoney(c.amount)}€ / persona</span>
+          <span class="season-collection-date">${formatDateShort(c.date)} · ${paidCount}/${totalCount} pagados</span>
+        </div>
+        ${members.map(name => `
+          <div class="season-member-row">
+            <span class="season-member-name">${escapeHtml(name)}</span>
+            <span class="${c.payments[name] ? 'season-member-paid' : 'season-member-pending'}">${c.payments[name] ? '✓ Pagado' : '✕ Pendiente'}</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }).join('');
+
+  return `
+    <button class="season-toggle" data-target="sc-${prefix}" data-count="${collections.length}">▼ Ver recogidas (${collections.length})</button>
+    <div class="season-collections" id="sc-${prefix}" style="display:none;">
+      ${detailsHtml}
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════
+// EXPORT / IMPORT / RESET
+// ═══════════════════════════════════
+function exportData() {
+  const defaultName = 'takarakuji_' + new Date().toISOString().split('T')[0];
+  document.getElementById('export-filename').value = defaultName;
+  openModal('modal-export');
+  setTimeout(() => {
+    const input = document.getElementById('export-filename');
+    input.focus();
+    input.select();
+  }, 300);
+}
+
+function doExport() {
+  let filename = document.getElementById('export-filename').value.trim();
+  if (!filename) filename = 'takarakuji_backup';
+  if (!filename.endsWith('.json')) filename += '.json';
+
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+
+  if (navigator.share && navigator.canShare) {
+    const file = new File([blob], filename, { type: 'application/json' });
+    if (navigator.canShare({ files: [file] })) {
+      navigator.share({ files: [file], title: filename.replace('.json', '') }).catch(() => {});
+      closeModal('modal-export');
+      return;
+    }
+  }
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+  closeModal('modal-export');
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const imported = JSON.parse(e.target.result);
+      if (imported.members && imported.plays !== undefined) {
+        data = imported;
+        if (!data.currentSeason) data.currentSeason = { name: 'Temporada 1', startDate: new Date().toISOString(), spent: 0, won: 0, collected: 0 };
+        if (!data.seasons) data.seasons = [];
+        if (!data.wins) data.wins = [];
+        if (!data.collections) data.collections = [];
+        // Migration on import
+        if (data.carryover === undefined) {
+          let carry = 0;
+          data.seasons.forEach(s => { carry += (s.collected || 0) - (s.spent || 0) + (s.won || 0); });
+          data.carryover = Math.round(carry * 100) / 100;
+        }
+        saveData();
+        renderHome();
+        alert('Datos importados correctamente');
+      } else {
+        alert('Archivo no válido');
+      }
+    } catch(err) {
+      alert('Error al leer el archivo');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+function confirmReset() {
+  document.getElementById('confirm-title').textContent = 'Borrar todo';
+  document.getElementById('confirm-msg').innerHTML = '¿Estás seguro? Se eliminarán jugadas, premios, recogidas y temporadas. Los miembros del grupo se mantienen. Esta acción no se puede deshacer.';
+  document.getElementById('confirm-btn').onclick = () => {
+    const members = data.members;
+    data = defaultData();
+    data.members = members;
+    saveData();
+    closeModal('modal-confirm');
+    showScreen('home');
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('.nav-item')[0].classList.add('active');
+  };
+  openModal('modal-confirm');
+}
+
+// ═══════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════
+function formatMoney(n) {
+  return n.toFixed(2).replace('.', ',');
+}
+
+function formatDate(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+function formatDateShort(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function formatDrawDate(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr + 'T12:00:00');
+  return 'Sorteo: ' + d.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// ═══════════════════════════════════
+// INIT
+// ═══════════════════════════════════
+renderHome();
+</script>
+
+</body>
+</html>
